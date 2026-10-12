@@ -11,18 +11,28 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::create([
-            'username' => 'admin',
-            'password_hash' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
-        UserProfile::create(['user_id' => $admin->id, 'full_name' => 'Administrator Sistem']);
+        $admin = User::firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'password_hash' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
+        UserProfile::firstOrCreate(
+            ['user_id' => $admin->id],
+            ['full_name' => 'Administrator Sistem']
+        );
 
-        $staff = User::create([
-            'username' => 'staff',
-            'password_hash' => Hash::make('staff123'),
-            'role' => 'staff',
-        ]);
-        UserProfile::create(['user_id' => $staff->id, 'full_name' => 'Staff Gudang']);
+        $staff = User::firstOrCreate(
+            ['username' => 'staff'],
+            [
+                'password_hash' => Hash::make('staff123'),
+                'role' => 'staff',
+            ]
+        );
+        UserProfile::firstOrCreate(
+            ['user_id' => $staff->id],
+            ['full_name' => 'Staff Gudang']
+        );
     }
 }
