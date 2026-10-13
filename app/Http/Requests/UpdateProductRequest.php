@@ -23,10 +23,12 @@ class UpdateProductRequest extends FormRequest
             'name' => 'required|string|max:150',
             'price' => 'required|numeric|min:0',
             'minimum_stock' => 'required|integer|min:0',
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
+            'supplier_price' => 'nullable|numeric|min:0',
             'supplier_ids' => 'nullable|array',
             'supplier_ids.*' => 'integer|exists:suppliers,id',
             'supplier_prices' => 'nullable|array',
-            'supplier_prices.*' => 'numeric|min:0',
+            'supplier_prices.*' => 'nullable|numeric|min:0',
         ];
     }
 
@@ -40,6 +42,11 @@ class UpdateProductRequest extends FormRequest
             'name.required' => 'Nama produk wajib diisi.',
             'price.min' => 'Harga tidak boleh negatif.',
             'minimum_stock.min' => 'Minimum stok tidak boleh negatif.',
+            'supplier_id.exists' => 'Supplier yang dipilih tidak valid.',
+            'supplier_price.numeric' => 'Harga pasok harus berupa angka.',
+            'supplier_price.min' => 'Harga pasok tidak boleh negatif.',
+            'supplier_prices.*.numeric' => 'Harga pasok supplier harus berupa angka.',
+            'supplier_prices.*.min' => 'Harga pasok supplier tidak boleh negatif.',
         ];
     }
 }

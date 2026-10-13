@@ -20,10 +20,12 @@ class StoreProductRequest extends FormRequest
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'minimum_stock' => 'required|integer|min:0',
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
+            'supplier_price' => 'nullable|numeric|min:0',
             'supplier_ids' => 'nullable|array',
             'supplier_ids.*' => 'integer|exists:suppliers,id',
             'supplier_prices' => 'nullable|array',
-            'supplier_prices.*' => 'numeric|min:0',
+            'supplier_prices.*' => 'nullable|numeric|min:0',
         ];
     }
 
@@ -38,6 +40,11 @@ class StoreProductRequest extends FormRequest
             'price.min' => 'Harga tidak boleh negatif.',
             'stock.min' => 'Stok tidak boleh negatif.',
             'minimum_stock.min' => 'Minimum stok tidak boleh negatif.',
+            'supplier_id.exists' => 'Supplier yang dipilih tidak valid.',
+            'supplier_price.numeric' => 'Harga pasok harus berupa angka.',
+            'supplier_price.min' => 'Harga pasok tidak boleh negatif.',
+            'supplier_prices.*.numeric' => 'Harga pasok supplier harus berupa angka.',
+            'supplier_prices.*.min' => 'Harga pasok supplier tidak boleh negatif.',
         ];
     }
 }

@@ -107,58 +107,39 @@
                     </div>
 
                     @if ($suppliers->isNotEmpty())
-                        @php
-                            $attachedSuppliers = $product->suppliers->keyBy('id');
-                        @endphp
                         <div class="card bg-light border-0 mb-4 p-3">
-                            <label class="form-label fw-bold small text-dark mb-2">Relasi Supplier & Harga Pasok</label>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-borderless align-middle mb-0">
-                                    <thead>
-                                        <tr class="text-muted small">
-                                            <th style="width: 40px;">Pilih</th>
-                                            <th>Nama Supplier</th>
-                                            <th style="width: 200px;">Harga Pasok (Rp)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($suppliers as $idx => $sup)
-                                            @php
-                                                $isAttached = $attachedSuppliers->has($sup->id);
-                                                $existingPrice = $isAttached ? $attachedSuppliers->get($sup->id)->pivot->supply_price : null;
-                                                $isChecked = old('supplier_ids') !== null
-                                                    ? (is_array(old('supplier_ids')) && in_array($sup->id, old('supplier_ids')))
-                                                    : $isAttached;
-                                                $valPrice = old("supplier_prices.$idx", $existingPrice !== null ? (int)$existingPrice : '');
-                                            @endphp
-                                            <tr>
-                                                <td>
-                                                    <input type="checkbox"
-                                                           name="supplier_ids[]"
-                                                           value="{{ $sup->id }}"
-                                                           class="form-check-input"
-                                                           id="sup_{{ $sup->id }}"
-                                                           {{ $isChecked ? 'checked' : '' }}>
-                                                </td>
-                                                <td>
-                                                    <label for="sup_{{ $sup->id }}" class="form-check-label user-select-none mb-0">
-                                                        <div class="fw-semibold">{{ $sup->name }}</div>
-                                                        <small class="text-muted">{{ $sup->contact }}</small>
-                                                    </label>
-                                                </td>
-                                                <td>
-                                                    <input type="number"
-                                                           name="supplier_prices[]"
-                                                           step="1"
-                                                           min="0"
-                                                           placeholder="Harga pasok"
-                                                           class="form-control form-control-sm"
-                                                           value="{{ $valPrice }}">
-                                                </td>
-                                            </tr>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="supplier_id" class="form-label fw-semibold small text-dark">Supplier <span class="text-muted fw-normal">(Opsional)</span></label>
+                                    <select name="supplier_id" id="supplier_id" class="form-select @error('supplier_id') is-invalid @enderror">
+                                        <option value="">-- Tanpa Supplier / Pilih Nanti --</option>
+                                        @foreach ($suppliers as $sup)
+                                            <option value="{{ $sup->id }}" {{ old('supplier_id', $selectedSupplierId ?? '') == $sup->id ? 'selected' : '' }}>
+                                                {{ $sup->name }}
+                                            </option>
                                         @endforeach
-                                    </tbody>
-                                </table>
+                                    </select>
+                                    @error('supplier_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="supplier_price" class="form-label fw-semibold small text-dark">Harga Pasok (Rp) <span class="text-muted fw-normal">(Opsional)</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">Rp</span>
+                                        <input type="number"
+                                               name="supplier_price"
+                                               id="supplier_price"
+                                               step="1"
+                                               min="0"
+                                               class="form-control @error('supplier_price') is-invalid @enderror"
+                                               placeholder="Harga beli dari supplier"
+                                               value="{{ old('supplier_price', $selectedSupplierPrice ?? '') }}">
+                                        @error('supplier_price')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     @endif

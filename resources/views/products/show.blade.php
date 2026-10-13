@@ -90,7 +90,7 @@
                                 <td class="small">{{ $sup->contact ?? '-' }}</td>
                                 <td class="small text-muted">{{ $sup->address ?? '-' }}</td>
                                 <td class="text-end fw-semibold">
-                                    {{ $sup->pivot->supply_price ? formatRupiah($sup->pivot->supply_price) : '-' }}
+                                    {{ $sup->pivot->supplier_price ? formatRupiah($sup->pivot->supplier_price) : '-' }}
                                 </td>
                             </tr>
                         @empty

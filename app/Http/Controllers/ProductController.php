@@ -58,7 +58,7 @@ class ProductController extends Controller
             'minimum_stock',
         ]));
 
-        $this->syncSuppliers($product, $request->input('supplier_ids'), $request->input('supplier_prices'));
+        $this->syncSuppliers($product, $request);
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
@@ -80,7 +80,17 @@ class ProductController extends Controller
         $categories = Category::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
 
-        return view('products.edit', compact('product', 'categories', 'suppliers'));
+        $primarySupplier = $product->suppliers->first();
+        $selectedSupplierId = $primarySupplier ? $primarySupplier->id : null;
+        $selectedSupplierPrice = $primarySupplier ? (int) $primarySupplier->pivot->supplier_price : null;
+
+        return view('products.edit', compact(
+            'product',
+            'categories',
+            'suppliers',
+            'selectedSupplierId',
+            'selectedSupplierPrice'
+        ));
     }
 
     public function update(UpdateProductRequest $request, Product $product): RedirectResponse
@@ -93,7 +103,7 @@ class ProductController extends Controller
             'minimum_stock',
         ]));
 
-        $this->syncSuppliers($product, $request->input('supplier_ids'), $request->input('supplier_prices'));
+        $this->syncSuppliers($product, $request);
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui.');
     }
@@ -111,15 +121,25 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus.');
     }
 
-    private function syncSuppliers(Product $product, ?array $supplierIds, ?array $supplierPrices): void
+    private function syncSuppliers(Product $product, Request $request): void
     {
         $syncData = [];
-        if (! empty($supplierIds)) {
-            foreach ($supplierIds as $idx => $supplierId) {
-                $price = isset($supplierPrices[$idx]) && is_numeric($supplierPrices[$idx])
-                    ? $supplierPrices[$idx]
-                    : null;
-                $syncData[$supplierId] = ['supply_price' => $price];
+
+        if ($request->filled('supplier_id')) {
+            $supplierId = (int) $request->input('supplier_id');
+            $price = $request->filled('supplier_price') && is_numeric($request->input('supplier_price'))
+                ? (float) $request->input('supplier_price')
+                : 0.00;
+            $syncData[$supplierId] = ['supplier_price' => $price];
+        } elseif ($request->has('supplier_ids')) {
+            $supplierIds = $request->input('supplier_ids', []);
+            $supplierPrices = $request->input('supplier_prices', []);
+            if (! empty($supplierIds)) {
+                foreach ($supplierIds as $idx => $sId) {
+                    $rawPrice = $supplierPrices[$sId] ?? $supplierPrices[$idx] ?? null;
+                    $price = is_numeric($rawPrice) ? (float) $rawPrice : 0.00;
+                    $syncData[$sId] = ['supplier_price' => $price];
+                }
             }
         }
 

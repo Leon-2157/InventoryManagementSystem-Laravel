@@ -136,6 +136,56 @@ class InventorySystemTest extends TestCase
         $this->assertDatabaseHas('products', ['id' => $product->id]);
     }
 
+    public function test_admin_can_create_product_with_nullable_supplier_prices(): void
+    {
+        $admin = User::where('username', 'admin')->first();
+        $category = Category::first();
+        $supplier = Supplier::first();
+
+        $response = $this->actingAs($admin)->post('/products', [
+            'category_id' => $category->id,
+            'sku' => 'TEST-SKU-VALIDATE-01',
+            'name' => 'Produk Tes Validasi',
+            'price' => 25000,
+            'stock' => 15,
+            'minimum_stock' => 5,
+            'supplier_ids' => [$supplier->id],
+            'supplier_prices' => [
+                $supplier->id => '20000',
+                9999 => '', // empty price for unselected supplier
+            ],
+        ]);
+
+        $response->assertRedirect(route('products.index'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('products', ['sku' => 'TEST-SKU-VALIDATE-01']);
+    }
+
+    public function test_admin_can_create_product_with_single_supplier_dropdown(): void
+    {
+        $admin = User::where('username', 'admin')->first();
+        $category = Category::first();
+        $supplier = Supplier::first();
+
+        $response = $this->actingAs($admin)->post('/products', [
+            'category_id' => $category->id,
+            'sku' => 'TEST-SKU-DROPDOWN-02',
+            'name' => 'Produk Tes Dropdown',
+            'price' => 50000,
+            'stock' => 20,
+            'minimum_stock' => 5,
+            'supplier_id' => $supplier->id,
+            'supplier_price' => '40000',
+        ]);
+
+        $response->assertRedirect(route('products.index'));
+        $response->assertSessionHas('success');
+        $product = Product::where('sku', 'TEST-SKU-DROPDOWN-02')->first();
+        $this->assertNotNull($product);
+        $this->assertTrue($product->suppliers->contains($supplier));
+        $this->assertEquals(40000, (float) $product->suppliers->first()->pivot->supplier_price);
+    }
+
     public function test_product_can_be_deleted_if_no_stock_movements(): void
     {
         $admin = User::where('username', 'admin')->first();
